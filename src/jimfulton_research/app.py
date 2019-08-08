@@ -3,11 +3,9 @@
 Top-level container for research app
 
 """
-from typing import Optional
+from contextlib import contextmanager
 
-import transaction
 from BTrees.OOBTree import BTree
-from ZODB import DB
 
 
 class App(BTree):
@@ -15,18 +13,21 @@ class App(BTree):
     # accounts: Accounts
 
 
-def setup(db: DB) -> Optional[App]:
+@contextmanager
+def setup():
     from .account import setup
+    from jimfulton_research.db import get_db
 
-    # noinspection PyUnusedLocal
-    with db.transaction() as connection:
-        connection = db.open()
-        root = connection.root
-        try:
-            app = root.app
-        except AttributeError:
-            root.app = app = App()
-            setup(app)
-            transaction.commit()
+    db = get_db()
+    connection = db.open()
+    root = connection.root
 
-        return app
+    try:
+        app: App = root.app
+    except AttributeError:
+        app = App()
+        root.app = app
+        setup(app)
+
+    yield app
+    db.close()

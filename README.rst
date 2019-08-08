@@ -20,6 +20,13 @@ pydantic
   subclassed from persistent, via immer-style "here's a copy with a proxy,
   scribble on it, hand it back, and I'll persist it" in a "store"
 
+    - From `Writing Persistent Objects <http://www.zodb.org/en/latest/guide/writing-persistent-objects.html>`_::
+
+        Because tuples are immutable, they satisfy the rules of persistence
+        without any special handling.
+
+
+
 Generations
 ===========
 
