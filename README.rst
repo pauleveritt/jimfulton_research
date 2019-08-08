@@ -1,56 +1,55 @@
-Research for sprint with Jim Fulton
-===================================
+=====================
+ZODB Research Project
+=====================
 
-In September 2019, before PyColorado, I'm sprinting with Jim to learn 
-some patterns about ZODB, pseudo-reactive programming, generational 
+In September 2019, before PyColorado, I'm sprinting with Jim to learn
+some patterns about ZODB, pseudo-reactive programming, generational
 sets, references, high performance collections, etc.
 
-Here are some things to ask Jim about.
+See `Questions <QUESTIONS.RST>`_ for research topics I've come up with.
 
-pydantic
-========
+Install
+=======
 
-- Can't use with Persistent::
+Requires Python 3.7+
 
-    File "/Users/pauleveritt/projects/pauleveritt/kaybee/jimfulton_research/.venv/lib/python3.7/site-packages/pydantic/dataclasses.py", line 73, in _pydantic_post_init
-        object.__setattr__(self, '__dict__', d)
-    TypeError: can't apply this __setattr__ to persistent.Persistent object
+#. ``pip install -e .`` or ``python setup.py develop``
 
-- Based on this, revisit the idea of persisting general dataclasses, not
-  subclassed from persistent, via immer-style "here's a copy with a proxy,
-  scribble on it, hand it back, and I'll persist it" in a "store"
+#. ``python -m jimfulton_research.watch`` goes into "server" mode, so
+   to speak. See below.
 
-    - From `Writing Persistent Objects <http://www.zodb.org/en/latest/guide/writing-persistent-objects.html>`_::
+#. ``python -m jimfulton_research.dump`` gives a listing of some of the
+   ZODB content. Since we're not doing ZEO at the moment, can't run at
+   same time as ``watch``.
 
-        Because tuples are immutable, they satisfy the rules of persistence
-        without any special handling.
+Exploring the Code
+==================
 
+``bootstrap.py`` is the main driver. It:
 
+- Makes a database and a root with sample content, if needed
 
-Generations
-===========
+- Makes an instance of the threadwatcher (though doesn't start it, the
+  ``watcher/__main__.py`` console script starts it up)
 
-- Impact of code changes, not data changes, and caching intermediate
-  representations (e.g. rendered components, image variations)
+- Subscribes to changeset events fired by ``notify`` in the thread
 
-  - How to detect thumbnail.py or breadcrumbs.py changed
+Watch Mode
+==========
 
-  - Do these code artifacts get considered as part of the generation?
+This runs a thread which uses the code in ``directory_watcher``. Basic
+premise:
 
-- What if it is a rebuild of the universe and there are 10,000 adds? Is
-  “contents” support enough?
+- The ``process_filesystem`` method walks the directory structure using
+  the very-fast ``os.scandir`` from modern Python
 
-- How are deletes tracked?
+- Files changed since the last interval are gathered into a "ChangeSet"
+  of add/edit/delete info
 
-- Should this extend to instances of a component on a page, and even all
-  the variations (e.g. batches) of that component instance?
+- A callback is run with that info provided
 
-General ZODB
-============
+- Sleep for an interval, start again
 
-- Scripts to pack
-
-General Python
-==============
-
-- Circular import avoidance and ``__all__``
+The current callback uses ``zope.event`` to broadcast the ChangeSet to
+subscribers. Since the notify happens in a subthread, the hope is that the
+subscribers run in the main thread and write to the ZODB.

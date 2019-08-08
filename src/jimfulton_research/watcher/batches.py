@@ -2,8 +2,8 @@ import logging
 from dataclasses import dataclass
 
 from jimfulton_research.resources import Folder
-from jimfulton_research.watcher.models import Changeset
-from jimfulton_research.watcher.watchgod_watcher import FileChangeInfo
+from jimfulton_research.directory_watcher.models import Changeset
+from jimfulton_research.directory_watcher.watchgod_watcher import FileChangeInfo
 from zope.event import notify
 
 logging.basicConfig(level=logging.INFO)
@@ -20,6 +20,7 @@ def handler(changeset: Changeset):
 
 
 def handle_newbatch(content: Folder, event: NewBatch):
+    f001 = content['f001']
     changes = event.changeset.changes
     for change in changes:
         change_type = change.change_type
@@ -28,5 +29,5 @@ def handle_newbatch(content: Folder, event: NewBatch):
             parent = str(file_path.parent.name)
             name = str(file_path.name)
             with file_path.open() as f:
-                body = f.read()
-                logging.info(body)
+                title = f.read()
+                f001['name'].title = title

@@ -4,24 +4,16 @@ Top-level container for research app
 
 """
 from contextlib import contextmanager
-from dataclasses import dataclass
 from functools import partial
 from inspect import getfile
 from pathlib import Path
 
 import transaction
-from jimfulton_research.batches import handle_newbatch
-from jimfulton_research.watcher.threadrunner import ThreadRunner
+from jimfulton_research.directory_watcher.threadrunner import ThreadRunner
+from jimfulton_research.watcher.batches import handle_newbatch, handler
 from zope.event import subscribers
 
-from .batches import handler
-from .resources import Folder
-
-
-@dataclass
-class App:
-    content: Folder
-    watcher: ThreadRunner
+from .resources import Folder, App
 
 
 @contextmanager
@@ -58,7 +50,5 @@ def setup():
             partial(handle_newbatch, content, ),
         )
 
-        app = App(content=content, watcher=watcher)
+        app = App(content=content, watcher=watcher, db=db)
         yield app
-
-    db.close()
