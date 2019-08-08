@@ -46,7 +46,7 @@ def setup():
         assert content_root.exists()
         interval = 1
         watcher = ThreadRunner(
-            partial(handler, content,),
+            handler,
             content_root,
             enabled=True,
             interval=interval,
@@ -54,7 +54,9 @@ def setup():
 
         # Wire up zope.event subscriber for new batches, notification
         # comes from the thread
-        subscribers.append(handle_newbatch)
+        subscribers.append(
+            partial(handle_newbatch, content, ),
+        )
 
         app = App(content=content, watcher=watcher)
         yield app

@@ -11,13 +11,17 @@ logging.basicConfig(level=logging.INFO)
 
 @dataclass
 class NewBatch:
-    parent: str
-    name: str
-    body: str
+    changeset: Changeset
 
 
-def handler(content: Folder, changeset: Changeset):
-    for change in changeset.changes:
+def handler(changeset: Changeset):
+    event = NewBatch(changeset=changeset)
+    notify(event)
+
+
+def handle_newbatch(content: Folder, event: NewBatch):
+    changes = event.changeset.changes
+    for change in changes:
         change_type = change.change_type
         file_path = change.file_path
         if change_type is FileChangeInfo.modified:
@@ -25,14 +29,4 @@ def handler(content: Folder, changeset: Changeset):
             name = str(file_path.name)
             with file_path.open() as f:
                 body = f.read()
-                event = NewBatch(
-                    parent=parent,
-                    name=name,
-                    body=body,
-                )
-                notify(event)
-
-
-def handle_newbatch(event: NewBatch):
-    m = f'New batch: {event.parent}, {event.name}, {event.body}'
-    logging.info(m)
+                logging.info(body)
