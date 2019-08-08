@@ -10,7 +10,7 @@ from pathlib import Path
 
 import transaction
 from jimfulton_research.directory_watcher.threadrunner import ThreadRunner
-from jimfulton_research.watcher.batches import handle_newbatch, handler
+from jimfulton_research.watcher.batches import handle_newbatch, handler_watcher
 from zope.event import subscribers
 
 from .resources import Folder, App
@@ -38,7 +38,7 @@ def setup():
         assert content_root.exists()
         interval = 1
         watcher = ThreadRunner(
-            handler,
+            handler_watcher,
             content_root,
             enabled=True,
             interval=interval,

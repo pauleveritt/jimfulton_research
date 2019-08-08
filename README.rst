@@ -53,3 +53,5 @@ premise:
 The current callback uses ``zope.event`` to broadcast the ChangeSet to
 subscribers. Since the notify happens in a subthread, the hope is that the
 subscribers run in the main thread and write to the ZODB.
+
+The work to handle the changeset is in ``watcher/batches.py``.
