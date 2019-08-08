@@ -11,3 +11,8 @@ General ZODB
 ============
 
 - Scripts to pack
+
+General Python
+==============
+
+- Circular import avoidance and ``__all__``

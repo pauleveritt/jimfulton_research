@@ -14,6 +14,7 @@ requires = [
     'waitress',
     'zc.generationalset',
     'transcrypt',
+    'pydantic',
 ]
 sample_requires = [
 ]
