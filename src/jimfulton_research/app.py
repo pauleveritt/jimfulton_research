@@ -3,19 +3,23 @@
 Top-level container for research app
 
 """
-from contextlib import contextmanager
 import logging
+from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 
 import transaction
-from BTrees.OOBTree import BTree
 from jimfulton_research.watcher.threadrunner import ThreadRunner
+
+from .resources import Folder
 
 logging.basicConfig(level=logging.INFO)
 
 
-class App(BTree):
-    pass
+@dataclass
+class App:
+    content: Folder
+    watcher: ThreadRunner
 
 
 def handler(*args):
@@ -24,19 +28,19 @@ def handler(*args):
 
 @contextmanager
 def setup():
-    from .account import setup
     from jimfulton_research.db import get_db
+    from .resources import setup as content_setup
 
     db = get_db()
     with db.transaction() as connection:
         root = connection.root
 
         try:
-            app: App = root.app
+            content = root.content
         except AttributeError:
-            app = App()
-            root.app = app
-            setup(app)
+            content = Folder()
+            root.content = content
+            content_setup(content)
             transaction.commit()
 
         # Setup the threadwatcher to get batches of changes
@@ -46,11 +50,8 @@ def setup():
         watcher = ThreadRunner(
             handler, content_root, enabled=enabled, interval=interval,
         )
-        try:
-            watcher.start()
-        except KeyboardInterrupt:
-            watcher.stop()
 
+        app = App(content=content, watcher=watcher)
         yield app
 
     db.close()
