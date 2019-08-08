@@ -22,7 +22,8 @@ class Account(persistent.Persistent):
 
 
 def setup(app: App):
-    app.accounts = accounts = Accounts()
+    accounts = Accounts()
+    app['accounts'] = accounts
 
     samples = {
         Account(name='one', title='One'),
