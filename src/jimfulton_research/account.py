@@ -2,16 +2,20 @@
 
 import persistent
 from persistent.mapping import PersistentMapping
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 
 from jimfulton_research.app import App
 
 
 class Accounts(PersistentMapping):
-    pass
+    def list_accounts(self):
+        return [
+            f'Account {account.name}: {account.title}'
+            for account in self.values()
+        ]
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Account(persistent.Persistent):
     name: str
     title: str

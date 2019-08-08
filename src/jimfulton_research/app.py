@@ -16,6 +16,8 @@ class App(BTree):
 
 
 def setup(db: DB) -> Optional[App]:
+    from .account import setup
+
     # noinspection PyUnusedLocal
     with db.transaction() as connection:
         connection = db.open()
@@ -24,6 +26,7 @@ def setup(db: DB) -> Optional[App]:
             app = root.app
         except AttributeError:
             root.app = app = App()
+            setup(app)
             transaction.commit()
 
         return app
