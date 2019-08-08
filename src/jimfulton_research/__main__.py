@@ -4,3 +4,7 @@ with setup() as app:
     accounts = app['accounts']
     entries = accounts.list_accounts()
     print('\n'.join(entries))
+
+    while True:
+        # Go into watch mode
+        pass
