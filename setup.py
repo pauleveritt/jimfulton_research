@@ -14,7 +14,7 @@ requires = [
     'waitress',
     'zc.generationalset',
     'transcrypt',
-    'pydantic',
+    'zope.event',
 ]
 sample_requires = [
 ]
